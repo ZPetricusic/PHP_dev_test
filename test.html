@@ -8,15 +8,35 @@
 </head>
 <body>
 	<script>
-		fetch("/id.php?id=1", {
-	"method": "GET"
-})
-.then(response => {
-	console.log(response);
-})
-.catch(err => {
-	console.error(err);
-});
+		let getterFunction = async (route, param) => {
+			let res = await fetch(`/${route}.php?${route}=${param}`, {
+				"method":"GET",
+				"headers":{
+					// the only two api keys in the DB currently
+					"api-key" : "ed559244775a1bc15bc99cf0f79b733b37c80ce0"
+					//"api-key" : "4985ba90ece24c965c2d3c4b64ebff49f301a2bc"
+					
+				}
+			});
+
+			res = await res.json();
+
+			console.log(res);
+		}
+
+		// examples
+		getterFunction("id", "5");
+		//getterFunction("id", "1");
+		//getterFunction("id", "s");	
+
+		//getterFunction("category", "Horror");
+		//getterFunction("category", "Comedy");
+		//getterFunction("category", "3512");
+		
+		//getterFunction("title", "php");
+		//getterFunction("title", "how i");
+		//getterFunction("title", "<>!#>");
+	
 	</script>
 </body>
 </html>

@@ -4,6 +4,35 @@ require_once "db/db.php";
 
 class Movie extends DB {
 
+    # error mapping
+    const BAD_TITLE_FORMAT = [
+        'error' => 'Incorrect or no movie title provided'
+    ]; 
+
+    const NO_TITLE_MATCH = [
+        'error' => 'No movie title matches the search query'
+    ];
+
+    const BAD_CATEGORY_FORMAT = [
+        'error' => 'Incorrect or no movie category provided'
+    ];
+
+    const NO_CATEGORY_MATCH = [
+        'error' => 'No movies match the requested category'
+    ];
+
+    const BAD_ID_FORMAT = [
+        'error' => 'Incorrect or no movie ID provided'
+    ];
+
+    const NO_ID_MATCH = [
+        'error' => 'No movie matches the requested ID'
+    ];
+
+    const DB_ERROR = [
+        "error" => "Errored while contacting the Movie database"
+    ];
+
     private $id;
     private $refcode;
     private $title;
@@ -11,9 +40,10 @@ class Movie extends DB {
     private $image;
     private $year;
 
-
     # create a Movie object
-    function __construct($id, $refcode, $title, $category, $image, $year)
+    # currently unnecessary, might need it in the future
+    
+    /*function __construct($id, $refcode, $title, $category, $image, $year)
     {
         $this->id = $id;
         $this->refcode = $refcode;
@@ -21,8 +51,9 @@ class Movie extends DB {
         $this->category = $category;
         $this->image = $image;
         $this->year = $year;
-    }
+    }*/
 
+    
     // task #1
     public static function getByTitle($title){
 
@@ -34,21 +65,23 @@ class Movie extends DB {
             #prepare the statement
             $stmt = $db->connect()->prepare($sql);
 
+            # title contains $title somewhere
             $stmt->execute([
                 "title" => "%".$title."%"
             ]);
 
-            #save objects into the result field, tmp
+            #save objects into the result field
             $result = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-            return json_encode($result);
+            #if records exist in the DB
+            if($stmt->rowCount() > 0)
+                #encode this because otherwise it goes out as an array
+                return json_encode($result);
+            else
+                return Movie::NO_TITLE_MATCH;
 
         } catch(PDOException $e){
-            
-            return json_encode([
-                'error' => 'Error while connecting to database'
-            ]);
-
+            return Movie::DB_ERROR;
         }
     }
 
@@ -67,14 +100,17 @@ class Movie extends DB {
                 "id" => $id
             ]);
 
-            $result = $stmt->fetch(PDO::FETCH_OBJ);
+            #fetchAll instead of fetch for consistency sake (JSON parsing)
+            $result = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-            return $result;
+            # if records exist in the DB
+            if($stmt->rowCount() > 0)
+                return json_encode($result);
+            else
+                return Movie::NO_ID_MATCH;
 
         } catch (PDOException $e) {
-            return json_encode([
-                'error' => 'Error while connecting to database'
-            ]);
+            return Movie::DB_ERROR;
         }
     }
 
@@ -94,14 +130,14 @@ class Movie extends DB {
 
             $result = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-            return json_encode($result);
+            # if records exist in the DB
+            if($stmt->rowCount() > 0)
+                return json_encode($result);
+            else
+                return Movie::NO_CATEGORY_MATCH;
 
         } catch (PDOException $e) {
-            
-            return json_encode([
-                'error' => 'Error while connecting to database'
-            ]);
-
+            return Movie::DB_ERROR;
         }
     }
 }
